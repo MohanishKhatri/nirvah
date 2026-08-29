@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #07080c;
+  color: #e8eaf0;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-line bg-surface p-5;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-amber text-[#07080C] hover:bg-[#f7cf5e];
+  }
+
+  .btn-ghost {
+    @apply btn border border-line bg-transparent text-body hover:border-line2 hover:bg-surface2;
+  }
+
+  .btn-danger {
+    @apply btn bg-danger text-white hover:bg-[#dc2626];
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface2 px-4 py-2.5 text-sm text-body placeholder:text-muted focus:border-amber focus:outline-none;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs uppercase tracking-wider text-muted;
+  }
+}
+
+/* React Flow overrides so the graph sits on our own surface colours. */
+.react-flow__attribution {
+  display: none;
+}
+
+.react-flow__controls-button {
+  background: #151920;
+  border-bottom: 1px solid #252a36;
+  fill: #e8eaf0;
+}
+
+.react-flow__controls-button:hover {
+  background: #1d222c;
+}
+
+.react-flow__edge-path {
+  stroke: #2e3545;
+  stroke-width: 1.5;
+}
+
+.react-flow__handle {
+  opacity: 0;
+}
