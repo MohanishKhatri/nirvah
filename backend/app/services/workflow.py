@@ -163,6 +163,8 @@ async def _send_node_email(
         node.source_doc,
         node.source_section,
     )
+    node.email_brief = brief
+    await db.commit()
     await email_service.send_approval_email(
         contact.email, node.approval_token, node.label, brief, request.structured_fields or {}
     )
@@ -284,6 +286,7 @@ async def send_due_reminders(db: AsyncSession) -> int:
         await email_service.send_reminder_email(
             contact.email, node.approval_token, node.label, brief, request.structured_fields or {}
         )
+        node.email_brief = brief
         node.reminder_sent_at = datetime.utcnow()
         await log_event(db, "REMINDER_SENT", request.id, {"node_id": node.id})
         sent += 1

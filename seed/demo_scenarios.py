@@ -23,9 +23,9 @@ from sqlalchemy import delete  # noqa: E402
 
 from app.db import SessionLocal, init_db  # noqa: E402
 from app.models import Event, Request, WorkflowNode  # noqa: E402
-from app.services.llm_mock import compile_workflow  # noqa: E402
+from app.services.llm_mock import compile_workflow, generate_approval_brief  # noqa: E402
 
-STUDENT = os.getenv("DEMO_STUDENT_EMAIL", "demo.student@nitk.edu.in")
+STUDENT = os.getenv("DEMO_STUDENT_EMAIL", "demo.student@college.edu")
 
 SCENARIO_1_TEXT = (
     "Our Robotics Club wants a two-day drone workshop for 120 students, Rs 35,000 funding "
@@ -126,6 +126,16 @@ async def build(db, raw_text: str, fields: dict, approved_roles: list[str], hour
             if node.order_index == tier:
                 node.status = "active"
                 node.activated_at = stamp
+
+    # Written directly rather than sent, but the content should still be there for the student
+    # to see — same as a real activation would generate.
+    approved_labels = [n.label for n in nodes if n.status == "approved"]
+    for node in nodes:
+        if node.status in ("approved", "active"):
+            completed_before = [label for label in approved_labels if label != node.label]
+            node.email_brief = generate_approval_brief(
+                node.label, fields, completed_before, node.reason, node.source_doc, node.source_section
+            )
 
     db.add(Event(request_id=request.id, event_type="WORKFLOW_COMPILED", payload={"seeded": True}))
     await db.commit()

@@ -48,6 +48,7 @@ class NodeOut(BaseModel):
     source_section: str | None
     parallel_group: str | None
     order_index: int
+    email_brief: str | None
     activated_at: datetime | None
     completed_at: datetime | None
 

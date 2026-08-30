@@ -87,6 +87,9 @@ export const mockWorkflow: WorkflowResponse = {
       source_section: "§3",
       parallel_group: null,
       order_index: 1,
+      email_brief:
+        "The Robotics Club is seeking approval for a two-day drone workshop for 120 students, " +
+        "with a budget of ₹35,000 and 3 external speakers. This is the first approval in the chain.",
       activated_at: "2026-08-29T10:00:00",
       completed_at: "2026-08-29T11:30:00",
     },
@@ -100,6 +103,9 @@ export const mockWorkflow: WorkflowResponse = {
       source_section: "§3",
       parallel_group: null,
       order_index: 2,
+      email_brief:
+        "The Robotics Club's two-day drone workshop has been approved by the Faculty Advisor " +
+        "and is now on your desk as the next required approver.",
       activated_at: "2026-08-29T11:30:00",
       completed_at: "2026-08-29T13:05:00",
     },
@@ -113,6 +119,9 @@ export const mockWorkflow: WorkflowResponse = {
       source_section: "§4.1",
       parallel_group: "clearances",
       order_index: 3,
+      email_brief:
+        "This event has 3 external speakers attending, which requires Security Office " +
+        "clearance. Already approved by Faculty Advisor, Head of Department.",
       activated_at: "2026-08-29T13:05:00",
       completed_at: null,
     },
@@ -126,6 +135,9 @@ export const mockWorkflow: WorkflowResponse = {
       source_section: "§2.3",
       parallel_group: "clearances",
       order_index: 3,
+      email_brief:
+        "120 attendees exceeds the 100-attendee threshold requiring Venue Office approval. " +
+        "Already approved by Faculty Advisor, Head of Department.",
       activated_at: "2026-08-29T13:05:00",
       completed_at: null,
     },
@@ -139,6 +151,7 @@ export const mockWorkflow: WorkflowResponse = {
       source_section: "§5.1",
       parallel_group: null,
       order_index: 4,
+      email_brief: null,
       activated_at: null,
       completed_at: null,
     },
@@ -152,6 +165,7 @@ export const mockWorkflow: WorkflowResponse = {
       source_section: "§8.2",
       parallel_group: null,
       order_index: 5,
+      email_brief: null,
       activated_at: null,
       completed_at: null,
     },
@@ -193,13 +207,13 @@ export const mockPolicies: Policy[] = [
 ];
 
 export const mockContacts: ApproverContact[] = [
-  { id: 1, role: "faculty_advisor", label: "Faculty Advisor", email: "faculty@nitk.edu.in" },
-  { id: 2, role: "hod", label: "Head of Department", email: "hod@nitk.edu.in" },
-  { id: 3, role: "dean", label: "Dean of Student Affairs", email: "dean@nitk.edu.in" },
-  { id: 4, role: "security", label: "Security Office", email: "security@nitk.edu.in" },
-  { id: 5, role: "venue", label: "Venue Office", email: "venues@nitk.edu.in" },
-  { id: 6, role: "finance", label: "Finance Office", email: "finance@nitk.edu.in" },
-  { id: 7, role: "registrar", label: "Registrar", email: "registrar@nitk.edu.in" },
+  { id: 1, role: "faculty_advisor", label: "Faculty Advisor", email: "faculty@college.edu" },
+  { id: 2, role: "hod", label: "Head of Department", email: "hod@college.edu" },
+  { id: 3, role: "dean", label: "Dean of Student Affairs", email: "dean@college.edu" },
+  { id: 4, role: "security", label: "Security Office", email: "security@college.edu" },
+  { id: 5, role: "venue", label: "Venue Office", email: "venues@college.edu" },
+  { id: 6, role: "finance", label: "Finance Office", email: "finance@college.edu" },
+  { id: 7, role: "registrar", label: "Registrar", email: "registrar@college.edu" },
 ];
 
 export const mockDiff: PolicyDiff = {

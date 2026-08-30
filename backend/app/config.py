@@ -41,7 +41,7 @@ class Settings:
     frontend_url: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
     admin_password: str = os.getenv("ADMIN_PASSWORD", "nirvah_admin_2024")
     google_client_id: str = os.getenv("GOOGLE_CLIENT_ID", "")
-    allowed_email_domain: str = os.getenv("ALLOWED_EMAIL_DOMAIN", "nitk.edu.in")
+    allowed_email_domain: str = os.getenv("ALLOWED_EMAIL_DOMAIN", "college.edu")
     reminder_after_hours: int = int(os.getenv("REMINDER_AFTER_HOURS", "24"))
 
     upload_dir: str = os.getenv("UPLOAD_DIR", "./uploads")

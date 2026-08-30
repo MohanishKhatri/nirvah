@@ -81,6 +81,15 @@ export default function PolicyProofPanel({
 
         {activated && <Row label="Activated">{activated}</Row>}
         {completed && <Row label="Completed">{completed}</Row>}
+
+        {node.email_brief && (
+          <div className="mt-4 border-t border-line pt-3">
+            <p className="text-xs uppercase tracking-wider text-muted">Sent to {node.label}</p>
+            <p className="mt-2 whitespace-pre-wrap rounded-xl border border-line bg-surface2 p-4 text-sm italic text-body">
+              {node.email_brief}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

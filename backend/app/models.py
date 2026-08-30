@@ -82,6 +82,9 @@ class WorkflowNode(Base):
     order_index: Mapped[int] = mapped_column(Integer, default=1)
     approval_token: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    #: The generated brief last sent to this node's approver — shown to the student (read-only,
+    #: content only) so the transparency the DAG already gives extends to the email itself.
+    email_brief: Mapped[str | None] = mapped_column(Text, nullable=True)
     activated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

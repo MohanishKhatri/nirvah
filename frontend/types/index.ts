@@ -39,6 +39,7 @@ export interface WorkflowNode {
   source_section: string | null;
   parallel_group: string | null;
   order_index: number;
+  email_brief: string | null;
   activated_at: string | null;
   completed_at: string | null;
 }

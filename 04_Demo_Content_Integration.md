@@ -66,13 +66,13 @@ Put them in `seed/policies/` and commit them. **Tell Person A the moment they're
 `seed/seed.py`. Needs to load the approver contacts:
 
 ```
-faculty_advisor  Faculty Advisor              faculty@nitk.edu.in
-hod              Head of Department           hod@nitk.edu.in
-dean             Dean of Student Affairs      dean@nitk.edu.in
-security         Security Office              security@nitk.edu.in
-venue            Venue Office                 venues@nitk.edu.in
-finance          Finance Office               finance@nitk.edu.in
-registrar        Registrar                    registrar@nitk.edu.in
+faculty_advisor  Faculty Advisor              faculty@college.edu
+hod              Head of Department           hod@college.edu
+dean             Dean of Student Affairs      dean@college.edu
+security         Security Office              security@college.edu
+venue            Venue Office                 venues@college.edu
+finance          Finance Office               finance@college.edu
+registrar        Registrar                    registrar@college.edu
 ```
 
 **Important:** use email addresses your team actually controls for the demo. Set them all to variations of a team member's Gmail (`yourname+dean@gmail.com`, `yourname+hod@gmail.com` — Gmail routes all `+suffix` addresses to the same inbox). This way you can actually show the approval email arriving and click it live.

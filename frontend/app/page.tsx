@@ -7,7 +7,7 @@ import { getMyRequests } from "@/lib/api";
 import { useIdentity } from "@/lib/useIdentity";
 import type { RequestSummary } from "@/types";
 
-const ALLOWED_DOMAIN = process.env.NEXT_PUBLIC_ALLOWED_DOMAIN ?? "nitk.edu.in";
+const ALLOWED_DOMAIN = process.env.NEXT_PUBLIC_ALLOWED_DOMAIN ?? "college.edu";
 
 function formatDate(iso: string) {
   const d = new Date(iso);

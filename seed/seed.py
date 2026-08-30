@@ -33,13 +33,13 @@ from app.services import embeddings  # noqa: E402
 POLICY_DIR = os.path.join(ROOT, "seed", "policies")
 
 CONTACTS = [
-    ("faculty_advisor", "Faculty Advisor", "faculty@nitk.edu.in"),
-    ("hod", "Head of Department", "hod@nitk.edu.in"),
-    ("dean", "Dean of Student Affairs", "dean@nitk.edu.in"),
-    ("security", "Security Office", "security@nitk.edu.in"),
-    ("venue", "Venue Office", "venues@nitk.edu.in"),
-    ("finance", "Finance Office", "finance@nitk.edu.in"),
-    ("registrar", "Registrar", "registrar@nitk.edu.in"),
+    ("faculty_advisor", "Faculty Advisor", "faculty@college.edu"),
+    ("hod", "Head of Department", "hod@college.edu"),
+    ("dean", "Dean of Student Affairs", "dean@college.edu"),
+    ("security", "Security Office", "security@college.edu"),
+    ("venue", "Venue Office", "venues@college.edu"),
+    ("finance", "Finance Office", "finance@college.edu"),
+    ("registrar", "Registrar", "registrar@college.edu"),
 ]
 
 # The circular is deliberately left out — it gets uploaded live during the demo.

@@ -446,7 +446,7 @@ function ContactsTab() {
           <input
             className="input"
             type="email"
-            placeholder="email@nitk.edu.in"
+            placeholder="email@college.edu"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />

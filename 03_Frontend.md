@@ -51,7 +51,7 @@ NEXTAUTH_SECRET=<openssl rand -base64 32>
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_ALLOWED_DOMAIN=nitk.edu.in
+NEXT_PUBLIC_ALLOWED_DOMAIN=college.edu
 NEXT_PUBLIC_USE_MOCKS=true          ← flip to false when B is ready
 ```
 
