@@ -2,9 +2,9 @@
 
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { handleApprovalAction, submitRejection } from "@/lib/api";
+import { confirmApproval, handleApprovalAction, submitRejection } from "@/lib/api";
 
-type Phase = "loading" | "done" | "error" | "confirm_reject";
+type Phase = "loading" | "done" | "error" | "confirm_approve" | "confirm_reject";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -45,6 +45,12 @@ function ApprovePageInner() {
           setPhase("confirm_reject");
           return;
         }
+        if (res.requires_confirmation) {
+          setLabel(res.label ?? "");
+          setPurpose(res.purpose ?? "");
+          setPhase("confirm_approve");
+          return;
+        }
         setOutcome(action === "reject" ? "rejected" : "approved");
         setMessage(res.message ?? "Done.");
         setPhase("done");
@@ -54,6 +60,21 @@ function ApprovePageInner() {
         setPhase("error");
       });
   }, [token, action]);
+
+  async function confirmApprove() {
+    setSubmitting(true);
+    try {
+      const res = await confirmApproval(token);
+      setOutcome("approved");
+      setMessage(res.message ?? "Approved.");
+      setPhase("done");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not record the approval.");
+      setPhase("error");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   async function confirmRejection() {
     setSubmitting(true);
@@ -103,6 +124,29 @@ function ApprovePageInner() {
         </p>
         <p className="mt-4 text-center text-sm text-body">{message}</p>
         <p className="mt-2 text-center text-xs text-muted">You may close this tab.</p>
+      </Shell>
+    );
+  }
+
+  if (phase === "confirm_approve") {
+    return (
+      <Shell>
+        <h1 className="text-lg font-medium text-body">Approve this request?</h1>
+        {purpose && <p className="mt-2 text-sm text-muted">{purpose}</p>}
+        {label && (
+          <p className="mt-1 text-xs uppercase tracking-wider text-muted">Acting as {label}</p>
+        )}
+
+        <button
+          onClick={() => void confirmApprove()}
+          disabled={submitting}
+          className="btn-primary mt-6 w-full"
+        >
+          {submitting ? "Recording…" : "Approve"}
+        </button>
+        <p className="mt-3 text-center text-xs text-muted">
+          This link is unique to you. No login is required.
+        </p>
       </Shell>
     );
   }

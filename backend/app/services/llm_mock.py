@@ -20,6 +20,14 @@ CATEGORY_REQUIRED_FIELDS: dict[str, list[str]] = {
 _NUM = r"(?:₹|rs\.?|inr)?\s*([\d][\d,]*(?:\.\d+)?)\s*(k|thousand|lakh|lakhs|cr|crore)?"
 
 
+def _as_number(value) -> float:
+    """A structured field can hold free text when an applicant's answer didn't parse as a
+    number (e.g. "not required" for budget, kept via ``_coerce`` in the requests router so it
+    stays visible in the conversation) — treat anything non-numeric as 0 rather than crashing
+    every downstream threshold comparison."""
+    return value if isinstance(value, (int, float)) else 0
+
+
 def _to_number(value: str, unit: str | None) -> float:
     amount = float(value.replace(",", ""))
     unit = (unit or "").lower()
@@ -162,9 +170,9 @@ def _approval(role, label, reason, doc, section, order, group=None) -> dict:
 def compile_workflow(structured_fields: dict, retrieved_chunks: list[dict] | None = None) -> dict:
     """Rule-based mirror of the four demo policies."""
     category = structured_fields.get("category", "other")
-    budget = structured_fields.get("budget") or 0
-    attendees = structured_fields.get("attendees") or 0
-    speakers = structured_fields.get("external_speakers") or 0
+    budget = _as_number(structured_fields.get("budget"))
+    attendees = _as_number(structured_fields.get("attendees"))
+    speakers = _as_number(structured_fields.get("external_speakers"))
     venue = (structured_fields.get("venue") or "").lower()
 
     approvals: list[dict] = []
@@ -178,35 +186,31 @@ def compile_workflow(structured_fields: dict, retrieved_chunks: list[dict] | Non
         )
 
     if category in {"student_event", "facility_booking", "travel"}:
+        # A registered club is not itself an academic department — Faculty Advisor approval
+        # alone covers club-organised activities (Student Activity Policy §3.1-§3.2).
         approvals.append(
             _approval(
                 "faculty_advisor",
                 "Faculty Advisor",
-                "All student club events require Faculty Advisor approval before escalation.",
+                "All student club events require Faculty Advisor approval; club events do not "
+                "additionally require Head of Department sign-off.",
                 "Student Activity Policy",
-                "§3",
+                "§3.1",
                 1,
             )
         )
-        approvals.append(
-            _approval(
-                "hod",
-                "Head of Department",
-                "Faculty Advisor approval is followed by Head of Department approval.",
-                "Student Activity Policy",
-                "§3",
-                2,
-            )
-        )
     else:
+        # Not a club event — an action initiated directly by an academic department, which
+        # routes through its Head of Department instead (Student Activity Policy §7.1).
         approvals.append(
             _approval(
                 "hod",
                 "Head of Department",
-                "Departmental requests are initiated through the Head of Department.",
+                "Actions initiated directly by an academic department require Head of "
+                "Department approval.",
                 "Student Activity Policy",
-                "§3",
-                2,
+                "§7.1",
+                1,
             )
         )
 
@@ -284,7 +288,7 @@ def compile_workflow(structured_fields: dict, retrieved_chunks: list[dict] | Non
             )
         )
 
-    if structured_fields.get("duration_days") and structured_fields["duration_days"] > 1:
+    if _as_number(structured_fields.get("duration_days")) > 1:
         missing_docs.append("Additional documentation for multi-day events (Student Activity Policy §5)")
 
     if blocks:
@@ -307,8 +311,10 @@ def generate_approval_brief(
 
     parts = [f"A student has submitted a request for {purpose}."]
     detail = []
-    if budget:
+    if isinstance(budget, (int, float)) and budget:
         detail.append(f"a budget of ₹{int(budget):,}")
+    elif budget:
+        detail.append(f"budget: {budget}")
     if attendees:
         detail.append(f"{attendees} expected attendees")
     if structured_fields.get("venue"):

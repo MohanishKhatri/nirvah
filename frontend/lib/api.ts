@@ -189,10 +189,21 @@ export async function handleApprovalAction(
 ): Promise<ApprovalActionResponse> {
   if (USE_MOCKS) {
     await delay();
-    return action === "approve" ? mock.mockApproveResult : mock.mockRejectPrompt;
+    return action === "approve" ? mock.mockApprovePrompt : mock.mockRejectPrompt;
   }
   return request<ApprovalActionResponse>(
     `/api/approvals/action?token=${encodeURIComponent(token)}&action=${action}`,
+  );
+}
+
+export async function confirmApproval(token: string): Promise<ApprovalActionResponse> {
+  if (USE_MOCKS) {
+    await delay();
+    return mock.mockApproveResult;
+  }
+  return request<ApprovalActionResponse>(
+    `/api/approvals/confirm?token=${encodeURIComponent(token)}`,
+    { method: "POST" },
   );
 }
 

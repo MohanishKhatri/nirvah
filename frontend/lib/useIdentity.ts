@@ -19,8 +19,10 @@ export interface Identity {
 /**
  * Wraps NextAuth so pages have one identity source.
  *
- * While NEXT_PUBLIC_USE_MOCKS is on, a demo student can be used instead of Google —
- * useful before OAuth credentials exist. It is unavailable once mocks are off.
+ * A demo student can always be used instead of Google — useful before OAuth credentials
+ * exist. This is independent of NEXT_PUBLIC_USE_MOCKS: the demo email plus an empty idToken
+ * is enough for the real backend too, as long as it has DEV_AUTH_BYPASS=true (it accepts any
+ * bearer token, including a missing one, before it ever looks at the token's contents).
  */
 export function useIdentity() {
   const { data: session, status } = useSession();
@@ -28,7 +30,7 @@ export function useIdentity() {
   const [demoChecked, setDemoChecked] = useState(false);
 
   useEffect(() => {
-    if (USE_MOCKS) setDemoEmail(sessionStorage.getItem(DEMO_KEY));
+    setDemoEmail(sessionStorage.getItem(DEMO_KEY));
     setDemoChecked(true);
   }, []);
 
@@ -44,7 +46,7 @@ export function useIdentity() {
     if (session) void signOut({ callbackUrl: "/" });
   }, [session]);
 
-  const isDemo = Boolean(USE_MOCKS && demoEmail && !session);
+  const isDemo = Boolean(demoEmail && !session);
 
   const identity: Identity = {
     ready: demoChecked && status !== "loading",

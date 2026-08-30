@@ -27,7 +27,12 @@ async def approval_action(
     action: str = Query("approve", pattern="^(approve|reject)$"),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    """The email link lands here. The UUID token is the only credential."""
+    """The email link lands here. The UUID token is the only credential.
+
+    Neither branch mutates anything — a GET must stay side-effect-free, since email clients and
+    link-scanning gateways prefetch links before a human ever looks at them. Both approve and
+    reject hand back what the confirm screen needs and wait for an explicit POST.
+    """
     node = await _node_for_token(db, token)
 
     if node.status == "approved":
@@ -37,15 +42,38 @@ async def approval_action(
     if node.status == "blocked":
         return {"message": "This approval is not active yet — earlier approvers have not responded"}
 
+    request = await db.get(Request, node.request_id)
+    purpose = (request.structured_fields or {}).get("purpose", "") if request else ""
+
     if action == "reject":
-        request = await db.get(Request, node.request_id)
-        purpose = (request.structured_fields or {}).get("purpose", "") if request else ""
         return {
             "requires_reason": True,
             "token": token,
             "label": node.label,
             "purpose": purpose,
         }
+
+    return {
+        "requires_confirmation": True,
+        "token": token,
+        "label": node.label,
+        "purpose": purpose,
+    }
+
+
+@router.post("/confirm")
+async def confirm_approval(
+    token: str = Query(...), db: AsyncSession = Depends(get_db)
+) -> dict:
+    """The explicit confirm step for approval — the only place that actually mutates."""
+    node = await _node_for_token(db, token)
+
+    if node.status == "approved":
+        return {"message": "This request has already been approved"}
+    if node.status == "rejected":
+        return {"message": "This request has already been rejected"}
+    if node.status == "blocked":
+        return {"message": "This approval is not active yet — earlier approvers have not responded"}
 
     await approve_node(db, node)
     return {"message": "Approved successfully. Thank you."}

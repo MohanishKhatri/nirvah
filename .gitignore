@@ -8,3 +8,5 @@ __pycache__/
 .DS_Store
 .env.local
 uploads/
+backend/nirvah.db
+frontend/tsconfig.tsbuildinfo
