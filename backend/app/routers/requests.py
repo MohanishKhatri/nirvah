@@ -15,19 +15,28 @@ router = APIRouter(prefix="/api/requests", tags=["requests"])
 
 
 def retrieval_query(fields: dict, raw_text: str) -> str:
-    """Bias retrieval toward the clauses that decide the chain: money, headcount, venue, guests."""
+    """Bias retrieval toward the clauses that decide the chain: money, headcount, venue, guests.
+
+    A field can hold free text instead of a number — ``_coerce`` falls back to the raw string
+    whenever the applicant's answer doesn't parse (e.g. "not required" for budget) — so every
+    numeric read here is guarded rather than assumed.
+    """
     parts = [raw_text]
     if fields.get("category"):
         parts.append(f"category {fields['category']}")
-    if fields.get("budget"):
-        parts.append(f"expenditure approval threshold budget {int(fields['budget'])}")
+    budget = fields.get("budget")
+    if isinstance(budget, (int, float)):
+        parts.append(f"expenditure approval threshold budget {int(budget)}")
+    elif budget:
+        parts.append(f"expenditure budget {budget}")
     if fields.get("attendees"):
         parts.append(f"venue approval attendees capacity {fields['attendees']}")
     if fields.get("external_speakers"):
         parts.append("external speakers guests security clearance")
     if fields.get("venue"):
         parts.append(f"venue booking {fields['venue']}")
-    if fields.get("duration_days") and fields["duration_days"] > 1:
+    duration = fields.get("duration_days")
+    if isinstance(duration, (int, float)) and duration > 1:
         parts.append("multi-day event documentation")
     return " ".join(parts)
 

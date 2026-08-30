@@ -6,7 +6,7 @@ when the container is up.
 ## Run
 
 ```bash
-python -m venv .venv && .venv/Scripts/activate      # bash: source .venv/bin/activate
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
 uvicorn app.main:app --reload --port 8000
@@ -31,7 +31,7 @@ ingested — it is uploaded live during the demo.
 
 | Var | Effect |
 |---|---|
-| `USE_LLM_MOCK` | `true` uses the deterministic rule engine in `services/llm_mock.py`; `false` + a `GEMINI_API_KEY` calls Gemini 1.5 Flash |
+| `USE_LLM_MOCK` | `true` uses the deterministic rule engine in `services/llm_mock.py`; `false` + a `GEMINI_API_KEY` calls Gemini 3.1 Flash-Lite |
 | `DEV_AUTH_BYPASS` | `true` accepts any bearer token as `demo.student@<domain>`; set `false` to verify real Google ID tokens |
 | `RESEND_API_KEY` | empty logs emails (with the approval links) instead of sending |
 | `ADMIN_PASSWORD` | value the `x-admin-password` header must match |
@@ -68,7 +68,8 @@ policy no longer justifies are dropped only while still blocked.
 
 ## Notes on retrieval
 
-Chunks are embedded with Gemini `embedding-001` when a key is present, and with a hashed
-bag-of-words vector otherwise, so retrieval works with no key at all. Vectors are stored as JSON
-and compared in Python — at a few hundred chunks that is instant and keeps one code path across
-SQLite and Postgres. Swap `search_relevant_chunks` for a pgvector `<=>` query if the corpus grows.
+Chunks are embedded locally with `sentence-transformers` (`all-MiniLM-L6-v2`) rather than through
+Gemini — it's free, has no rate limit, needs no network round trip per chunk, and keeps embedding
+availability decoupled from the chat model's API. Vectors are stored as JSON and compared in
+Python — at a few hundred chunks that is instant and keeps one code path across SQLite and
+Postgres. Swap `search_relevant_chunks` for a pgvector `<=>` query if the corpus grows.

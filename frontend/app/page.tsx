@@ -16,7 +16,7 @@ function formatDate(iso: string) {
 }
 
 export default function HomePage() {
-  const { ready, authed, email, idToken, isDemo, mocksEnabled, signInGoogle, signOutAll, enterDemo } =
+  const { ready, authed, email, idToken, isDemo, signInGoogle, signOutAll, enterDemo } =
     useIdentity();
   const [requests, setRequests] = useState<RequestSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -61,11 +61,9 @@ export default function HomePage() {
             Restricted to <span className="text-body">@{ALLOWED_DOMAIN}</span> accounts.
           </p>
 
-          {mocksEnabled && (
-            <button onClick={enterDemo} className="btn-ghost mt-4 w-full">
-              Continue as demo student
-            </button>
-          )}
+          <button onClick={enterDemo} className="btn-ghost mt-4 w-full">
+            Continue as demo student
+          </button>
 
           <Link href="/admin" className="mt-10 inline-block text-xs text-muted hover:text-body">
             Admin panel →

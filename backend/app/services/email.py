@@ -59,7 +59,7 @@ def _summary_rows(structured_fields: dict) -> str:
         value = structured_fields.get(key)
         if value in (None, "", 0):
             continue
-        if key == "budget":
+        if key == "budget" and isinstance(value, (int, float)):
             value = f"&#8377;{int(value):,}"
         rows.append(
             f'<tr><td style="padding:6px 12px 6px 0;color:#6B7280;font-size:13px;">{label}</td>'

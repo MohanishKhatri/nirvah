@@ -72,6 +72,7 @@ export interface RequestSummary {
 export interface ApprovalActionResponse {
   message?: string;
   requires_reason?: boolean;
+  requires_confirmation?: boolean;
   token?: string;
   label?: string;
   purpose?: string;

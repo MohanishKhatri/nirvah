@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hmac
 import logging
 
 from fastapi import Header, HTTPException, status
@@ -49,6 +50,6 @@ async def get_current_user(authorization: str | None = Header(default=None)) -> 
 
 
 async def require_admin(x_admin_password: str | None = Header(default=None)) -> bool:
-    if x_admin_password != settings.admin_password:
+    if not hmac.compare_digest(x_admin_password or "", settings.admin_password):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid admin password")
     return True

@@ -222,6 +222,13 @@ export const mockDiff: PolicyDiff = {
   removed: [],
 };
 
+export const mockApprovePrompt = {
+  requires_confirmation: true,
+  token: "mock-token",
+  label: "Faculty Advisor",
+  purpose: "Two-day drone workshop for 120 students",
+};
+
 export const mockApproveResult = {
   message: "Approved successfully. Thank you.",
 };

@@ -7,7 +7,6 @@ chunks) that is instant, and it keeps the same code path on SQLite and Postgres.
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import math
 import re
@@ -16,19 +15,16 @@ from typing import Iterable
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
 from app.models import Policy, PolicyChunk
 
 logger = logging.getLogger(__name__)
 
-EMBED_DIM = 768
-EMBED_MODEL = "models/embedding-001"
+#: all-MiniLM-L6-v2's native output size — retrieval quality is solid for policy-length text,
+#: it's ~80MB, and it runs fast on CPU with no GPU needed at this corpus size.
+EMBED_DIM = 384
+EMBED_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 SECTION_RE = re.compile(r"(?:§|Section\s+)(\d+(?:\.\d+)*)", re.IGNORECASE)
-
-
-def _live() -> bool:
-    return bool(settings.gemini_api_key) and not settings.use_llm_mock
 
 
 # ------------------------------------------------------------------ pdf → text
@@ -122,48 +118,32 @@ def chunk_text(pages: Iterable[dict], chunk_size: int = 70, overlap: int = 20) -
 
 # ------------------------------------------------------------------ embedding
 
-def _local_embed(text: str) -> list[float]:
-    """Hashed bag-of-words vector — a lexical stand-in used when no Gemini key is configured."""
-    vec = [0.0] * EMBED_DIM
-    for token in re.findall(r"[a-z0-9₹.]+", text.lower()):
-        if len(token) < 2:
-            continue
-        digest = hashlib.md5(token.encode("utf-8")).digest()
-        index = int.from_bytes(digest[:4], "big") % EMBED_DIM
-        sign = 1.0 if digest[4] % 2 == 0 else -1.0
-        vec[index] += sign
-    norm = math.sqrt(sum(v * v for v in vec)) or 1.0
-    return [v / norm for v in vec]
+_st_model = None
 
 
-def _gemini_embed(text: str, task_type: str) -> list[float]:
-    import google.generativeai as genai
+def _get_model():
+    """Lazy singleton — loading the model is the expensive part, so pay for it once."""
+    global _st_model
+    if _st_model is None:
+        from sentence_transformers import SentenceTransformer
 
-    genai.configure(api_key=settings.gemini_api_key)
-    result = genai.embed_content(model=EMBED_MODEL, content=text, task_type=task_type)
-    return list(result["embedding"])
+        _st_model = SentenceTransformer(EMBED_MODEL)
+    return _st_model
 
 
 def embed_text(text: str) -> list[float]:
     """Embedding for a stored document chunk."""
-    if not _live():
-        return _local_embed(text)
-    try:
-        return _gemini_embed(text, "retrieval_document")
-    except Exception:
-        logger.exception("embed_text failed; using local embedding")
-        return _local_embed(text)
+    return _get_model().encode(text, normalize_embeddings=True).tolist()
 
 
 def embed_query(text: str) -> list[float]:
-    """Embedding for a search query — Gemini optimises these differently from documents."""
-    if not _live():
-        return _local_embed(text)
-    try:
-        return _gemini_embed(text, "retrieval_query")
-    except Exception:
-        logger.exception("embed_query failed; using local embedding")
-        return _local_embed(text)
+    """Embedding for a search query.
+
+    Unlike Gemini's embedding API, MiniLM has no separate query/document task type — it's a
+    symmetric similarity model, so this is the same call as ``embed_text``. Kept as its own
+    function so callers don't need to care which kind of text they're embedding.
+    """
+    return embed_text(text)
 
 
 def cosine_similarity(a: list[float], b: list[float]) -> float:
@@ -229,8 +209,12 @@ async def ingest_text(
 
 
 async def search_relevant_chunks(
-    db: AsyncSession, query_text: str, top_k: int = 8
+    db: AsyncSession, query_text: str, top_k: int = 12
 ) -> list[dict]:
+    """top_k=12, not 8: a genuinely relevant chunk (e.g. Finance Policy's expenditure threshold)
+    has been observed ranking 9th on a real query — a small local model's similarity scores
+    cluster tightly, so a tight cutoff drops real matches by a narrow margin. 12 chunks is still
+    cheap for a flash-lite prompt and gives that margin some room."""
     query_vec = embed_query(query_text)
 
     rows = (
